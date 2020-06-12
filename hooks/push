@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/../"
+. ${BASE_DIR}.env
+
+if [ "$DOCKER_TAG" == "latest" ]; then
+  export DOCKER_TAG=$PG_BOUNCER_VERSION
+fi
+
+docker push $DOCKER_REPO:$DOCKER_TAG

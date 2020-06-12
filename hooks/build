@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/../"
+. ${BASE_DIR}.env
+
+if [ "$DOCKER_TAG" == "latest" ]; then
+  export DOCKER_TAG=$PG_BOUNCER_VERSION
+fi
+
+docker build \
+  --build-arg ALPINE_VERSION=$ALPINE_VERSION --build-arg PG_BOUNCER_VERSION=${PG_BOUNCER_VERSION} \
+  -f Dockerfile -t $DOCKER_REPO:$DOCKER_TAG $BASE_DIR

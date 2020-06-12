@@ -1,0 +1,57 @@
+version: '3.7'
+
+volumes:
+  pg-data:
+    
+services:
+  postgres:
+    image: tinslice/postgres:12-ubuntu-18.04
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "cat", "/var/lib/postgresql/data/container_ready"]
+      timeout: 10s
+      retries: 20
+    environment:
+      PGDATA: "/var/lib/postgresql/data"
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_ROLES: '[
+        {
+          "name": "readonly"
+        }
+      ]'
+      POSTGRES_USERS: '[
+        {
+          "name": "myuser",
+          "password": "changeit",
+          "privileges": ["SUPERUSER"]
+        },
+        {
+          "name": "readonly_user",
+          "password": "changeit",
+          "roles": ["readonly"]
+        }
+      ]'
+      POSTGRES_DB: '{
+        "mydb": {
+          "roles": [
+            { "name": "myuser", "owner": "true" },
+            { "name": "readonly" }
+          ],
+          "init": []
+        }
+      }'
+
+  pgbouncer:
+    image: tinslice/pgbouncer
+    container_name: pgbouncer
+    ports:
+      - "8432:8432"
+    volumes:
+      - ./config/pgbouncer:/etc/pgbouncer
+    environment:
+      PGB_PORT: 8432
